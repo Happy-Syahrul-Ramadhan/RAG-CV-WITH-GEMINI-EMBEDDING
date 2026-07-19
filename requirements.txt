@@ -1,0 +1,6 @@
+# PDF Embedding Starter - Dependencies
+google-genai>=1.0.0
+chromadb>=0.6.0
+PyMuPDF>=1.25.0
+python-dotenv>=1.1.0
+tqdm>=4.67.0
