@@ -26,10 +26,8 @@ class PDFProcessor:
     @staticmethod
     def get_page_count(pdf_path: str) -> int:
         """Get the number of pages in a PDF."""
-        doc = fitz.open(pdf_path)
-        count = doc.page_count
-        doc.close()
-        return count
+        with fitz.open(pdf_path) as doc:
+            return doc.page_count
 
     @staticmethod
     def extract_text(pdf_path: str) -> str:
@@ -42,14 +40,13 @@ class PDFProcessor:
         Returns:
             Full text content of the PDF.
         """
-        doc = fitz.open(pdf_path)
-        full_text = ""
-        for page_num, page in enumerate(doc, 1):
-            text = page.get_text()
-            if text.strip():
-                full_text += f"\n\n--- Page {page_num} ---\n\n{text}"
-        doc.close()
-        return full_text.strip()
+        with fitz.open(pdf_path) as doc:
+            full_text = ""
+            for page_num, page in enumerate(doc, 1):
+                text = page.get_text()
+                if text.strip():
+                    full_text += f"\n\n--- Page {page_num} ---\n\n{text}"
+            return full_text.strip()
 
     @staticmethod
     def extract_text_by_page(pdf_path: str) -> List[Tuple[int, str]]:
@@ -62,14 +59,13 @@ class PDFProcessor:
         Returns:
             List of (page_number, text) tuples.
         """
-        doc = fitz.open(pdf_path)
-        pages = []
-        for page_num, page in enumerate(doc, 1):
-            text = page.get_text().strip()
-            if text:
-                pages.append((page_num, text))
-        doc.close()
-        return pages
+        with fitz.open(pdf_path) as doc:
+            pages = []
+            for page_num, page in enumerate(doc, 1):
+                text = page.get_text().strip()
+                if text:
+                    pages.append((page_num, text))
+            return pages
 
     @staticmethod
     def chunk_text(
