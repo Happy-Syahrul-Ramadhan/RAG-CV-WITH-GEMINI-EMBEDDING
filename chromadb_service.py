@@ -58,26 +58,34 @@ class ChromaDBService:
                 "Please set it in your .env file."
             )
         
-        # Check if running in Streamlit Cloud or similar deployment environment
-        is_deployment = os.getenv("STREAMLIT_RUNTIME_ENV") or os.getenv("DEPLOY_ENV")
-        
-        if is_deployment:
-            # Use HttpClient for deployment environments
-            # This avoids the "http-only client mode" error
-            return chromadb.HttpClient(
-                host="https://api.trychroma.com",
-                headers={
-                    "Authorization": f"Bearer {Config.CHROMA_CLOUD_API_KEY}",
-                    "X-Chroma-Token": Config.CHROMA_CLOUD_API_KEY
-                }
-            )
-        else:
-            # Use CloudClient for local development
+        try:
+            # Try CloudClient first (for local and compatible environments)
             return chromadb.CloudClient(
                 api_key=Config.CHROMA_CLOUD_API_KEY,
                 tenant=Config.CHROMA_CLOUD_TENANT,
                 database=Config.CHROMA_CLOUD_DATABASE
             )
+        except Exception as e:
+            # Fallback to HttpClient for Streamlit Cloud deployment
+            if "http-only client mode" in str(e):
+                # Construct the host URL for ChromaDB Cloud
+                host = f"https://api.trychroma.com"
+                
+                return chromadb.HttpClient(
+                    host=host,
+                    settings=Settings(
+                        chroma_api_impl="chromadb.api.fastapi.FastAPI",
+                        chroma_server_host=host,
+                        chroma_server_http_port=443,
+                        chroma_server_ssl_enabled=True,
+                        chroma_server_headers={
+                            "Authorization": f"Bearer {Config.CHROMA_CLOUD_API_KEY}",
+                            "x-chroma-token": Config.CHROMA_CLOUD_API_KEY
+                        }
+                    )
+                )
+            else:
+                raise
 
     def _init_local_client(self) -> chromadb.PersistentClient:
         """Initialize local ChromaDB client."""
