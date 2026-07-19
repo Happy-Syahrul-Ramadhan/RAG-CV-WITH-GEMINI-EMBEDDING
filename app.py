@@ -14,13 +14,13 @@ from config import Config
 
 # Page config
 st.set_page_config(
-    page_title="PDF Chatbot ChromaDB",
+    page_title="Chatbot RAG",
     page_icon="💬",
     layout="centered"
 )
 
-st.title("💬 PDF Chatbot with ChromaDB")
-st.caption("Tanya jawab dengan dokumen PDF menggunakan ChromaDB")
+st.title("💬 Chatbot RAG")
+st.caption("Tanya jawab dengan dokumen PDF menggunakan LLM")
 
 # Initialize session state
 if "messages" not in st.session_state:
