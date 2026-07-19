@@ -8,6 +8,7 @@ methods for storing and retrieving embeddings.
 from typing import List, Dict, Optional, Any
 import chromadb
 from chromadb.config import Settings
+import os
 
 from config import Config
 
@@ -39,7 +40,7 @@ class ChromaDBService:
         # Get or create collection
         self.collection = None
 
-    def _init_cloud_client(self) -> chromadb.CloudClient:
+    def _init_cloud_client(self):
         """Initialize ChromaDB Cloud client."""
         if not Config.CHROMA_CLOUD_API_KEY:
             raise ValueError(
@@ -57,11 +58,26 @@ class ChromaDBService:
                 "Please set it in your .env file."
             )
         
-        return chromadb.CloudClient(
-            api_key=Config.CHROMA_CLOUD_API_KEY,
-            tenant=Config.CHROMA_CLOUD_TENANT,
-            database=Config.CHROMA_CLOUD_DATABASE
-        )
+        # Check if running in Streamlit Cloud or similar deployment environment
+        is_deployment = os.getenv("STREAMLIT_RUNTIME_ENV") or os.getenv("DEPLOY_ENV")
+        
+        if is_deployment:
+            # Use HttpClient for deployment environments
+            # This avoids the "http-only client mode" error
+            return chromadb.HttpClient(
+                host="https://api.trychroma.com",
+                headers={
+                    "Authorization": f"Bearer {Config.CHROMA_CLOUD_API_KEY}",
+                    "X-Chroma-Token": Config.CHROMA_CLOUD_API_KEY
+                }
+            )
+        else:
+            # Use CloudClient for local development
+            return chromadb.CloudClient(
+                api_key=Config.CHROMA_CLOUD_API_KEY,
+                tenant=Config.CHROMA_CLOUD_TENANT,
+                database=Config.CHROMA_CLOUD_DATABASE
+            )
 
     def _init_local_client(self) -> chromadb.PersistentClient:
         """Initialize local ChromaDB client."""
