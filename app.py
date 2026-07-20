@@ -14,13 +14,13 @@ from config import Config
 
 # Page config
 st.set_page_config(
-    page_title="Chatbot RAG",
+    page_title="Simple RAG with Gemini Embeddings",
     page_icon="💬",
     layout="centered"
 )
 
-st.title("💬 Chatbot RAG")
-st.caption("Tanya jawab dengan dokumen PDF menggunakan LLM")
+st.title("💬 Simple RAG with Gemini Embeddings")
+st.caption("Tanya tentang diri saya sendiri")
 
 # Initialize session state
 if "messages" not in st.session_state:
